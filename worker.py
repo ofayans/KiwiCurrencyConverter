@@ -20,6 +20,6 @@ def do_job(amount, icurrency, ocurrency=None):
             except RateNotFoundError:
                 pass
         result['output'] = output
-    print json.dumps(result)
+    return result
 
 
