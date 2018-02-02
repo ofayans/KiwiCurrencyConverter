@@ -9,9 +9,12 @@ from werkzeug.exceptions import BadRequestKeyError
 
 app = Flask(__name__)
 
+
 def returnError(missing_arg, error):
-    error.description = ("Your request lacks the obligatory argument: %s" % missing_arg)
+    error.description = ("Your request lacks the obligatory argument: %s"
+                         % missing_arg)
     return error
+
 
 @app.route("/")
 def main():
@@ -30,11 +33,7 @@ def main():
         ocurrency = request.args['output_currency']
     except BadRequestKeyError:
         pass
-    import pdb
-    pdb.set_trace()
     return jsonify(do_job(float(amount), icurrency, ocurrency))
-
-
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')

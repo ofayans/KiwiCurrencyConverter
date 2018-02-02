@@ -6,32 +6,31 @@ import json
 import os
 
 
-def translate_symbol(symbol):
+def translate_symbol(symbol, web=True):
     file_path = os.path.dirname(os.path.abspath(__file__))
+    if not web:
+        symbol = symbol.decode('utf-8')
     with open(file_path+'/raw_data/currencies.json') as f:
         currency_data = json.load(f)
-        import pdb
-        pdb.set_trace()
-        return filter(lambda x: x[u'symbol'] == symbol, currency_data)[0][u'cc']
-    return None
+        try:
+            return filter(lambda x: x[u'symbol'] == symbol,
+                          currency_data)[0][u'cc']
+        except IndexError:
+            # It was a currency code, not symbol
+            return symbol
 
 
-def deside(symbol):
-    result = symbol.decode('utf-8')
-    if result:
-        return result, True
-    return symbol, False 
-
-
-def do_job(translate, amount, icurrency, ocurrency=None):
+def do_job(amount, icurrency, ocurrency=None, web=True):
     converter = CurrencyConverter()
-    if translate:
-        icurrency = translate_symbol(icurrency)
+    icurrency = translate_symbol(icurrency, web)
     result = {}
-    result['input'] = { "amount": amount,
-                        "currency": icurrency}
+    result['input'] = {"amount": amount,
+                       "currency": icurrency}
     if ocurrency:
-        result['output'] = {ocurrency: converter.convert(amount, icurrency, ocurrency)}
+        ocurrency = translate_symbol(ocurrency)
+        result['output'] = {ocurrency: converter.convert(amount,
+                                                         icurrency,
+                                                         ocurrency)}
     else:
         destination_currencies = converter.currencies - set([icurrency])
         output = {}
@@ -42,5 +41,3 @@ def do_job(translate, amount, icurrency, ocurrency=None):
                 pass
         result['output'] = output
     return result
-
-
